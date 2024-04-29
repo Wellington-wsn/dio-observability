@@ -1,0 +1,29 @@
+global:
+  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+
+rule_files:
+  - "alert.rules"  # regras de alarmes
+
+scrape_configs:   # Definir as targets para (busca varredura), vizualisado no link localhost:9090/targets, status
+  - job_name: prometheus  # target, monitoramento da propria aplicação prometheus
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['prometheus:9090']
+  - job_name: cadvisor    # target, informação geral do comportamento do docker local
+    scrape_interval: 5s
+    static_configs:
+    - targets:
+      - cadvisor:8080
+  - job_name: app     # target  vizualisado da aplicação
+    scrape_interval: 5s
+    static_configs:
+    - targets: [ 'app:8080' ]
+    metrics_path: /actuator/prometheus
+
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets:
+            - 'alertmanager:9093'  # target no prometheus, todos os alerta enviados para essa target
